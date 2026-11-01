@@ -1,0 +1,590 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#fff1de"><meta name="apple-mobile-web-app-capable" content="yes"><title>Fluffy Jar — 100 Level Adventure</title><style>
+:root{--ink:#42375b;--muted:#857a99;--pink:#ff6f9a;--purple:#8066e9;--cream:#fff8ef;--line:#eadcf6;--mint:#58cdb5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;font-family:ui-rounded,"Arial Rounded MT Bold",system-ui,-apple-system,sans-serif;color:var(--ink)}
+body{position:fixed;inset:0;background:#fcece2}
+button{font:inherit;border:0;cursor:pointer;touch-action:manipulation}
+button:focus-visible{outline:3px solid #6a50df;outline-offset:2px}
+#app{position:absolute;inset:0;min-height:0;display:flex;flex-direction:column;align-items:center;overflow:hidden;background:radial-gradient(ellipse at 5% 10%,rgba(255,224,157,.7),transparent 39%),radial-gradient(ellipse at 88% 62%,rgba(205,184,255,.53),transparent 52%),linear-gradient(180deg,#fff8ed 0%,#faecff 58%,#eaf7fc 100%);padding:calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 6px)}
+.shell{width:min(100%,480px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:6px;flex:none;min-height:46px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-logo{display:block;width:min(43vw,190px);max-height:58px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(179,139,130,.28))}
+.brand-text{font-weight:950;font-size:17px;line-height:1.02;letter-spacing:-.75px;white-space:nowrap}
+.brand-text small{display:block;color:#a48fa9;font-size:9px;letter-spacing:1.5px;font-weight:900;margin-top:4px}
+.top-actions{display:flex;gap:7px}
+.icon-btn{width:37px;height:37px;border:1px solid #e6d8ef;border-radius:13px;background:#ffffffbb;box-shadow:0 3px 9px #8b65aa13;color:var(--ink);display:grid;place-items:center;font-size:17px}
+.scores{display:grid;grid-template-columns:1fr 78px 1fr;gap:7px;margin-top:6px;flex:none}
+.score-card,.preview-card{background:rgba(255,255,255,.81);border:1.5px solid #fff;box-shadow:0 6px 19px #a18cb322,inset 0 -3px 0 #e4d3f04d;border-radius:18px;height:66px;display:flex;flex-direction:column;justify-content:center;padding:7px 14px}
+.score-card:last-child{text-align:right}
+.kicker{font-size:9px;text-transform:uppercase;letter-spacing:1.3px;color:#9b8da9;font-weight:900}
+.digit{font-size:25px;line-height:1.25;letter-spacing:-1px;font-weight:1000;color:#514073;font-variant-numeric:tabular-nums}
+.score-card:first-child .digit{color:#ec689a}
+.preview-card{padding:4px;align-items:center;justify-content:flex-start;gap:0;background:linear-gradient(150deg,#fff9d6,#ffecf5)}
+#next-preview{width:52px;height:41px;display:block}
+.status{min-height:37px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:7px}
+.mode-pill,.time-pill,.combo-pill{border-radius:999px;padding:8px 11px;background:#ffffffb8;border:1.5px solid #ffffff;font-size:11px;font-weight:900;white-space:nowrap;box-shadow:0 4px 12px #d3badb23}
+.mode-pill{color:#8059c8}
+.time-pill{color:#ef678d;min-width:82px;text-align:center}
+.time-pill.low{background:#ffe0e8;color:#d83962;animation:pulse .7s ease-in-out infinite alternate}
+.combo-pill{color:#ad86bd;opacity:.8;transition:transform .2s}
+.combo-pill.live{color:#fff;background:linear-gradient(130deg,#ff8e83,#ff61ac);border-color:#ffb5c4;opacity:1;transform:scale(1.05)}
+.board-wrap{flex:1;position:relative;min-height:0;width:min(calc(100% + 24px),530px);margin:0 -12px}
+#board{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.board-hint{display:none}
+.danger{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);width:70%;height:6px;border-radius:100px;overflow:hidden;background:#d6c9e366;border:1px solid #ffffffa8;pointer-events:none}
+#danger-fill{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ffbf80,#f35778);border-radius:100px;transition:width .10s linear}
+.control-bar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:2px auto 0;flex:none}
+.power{min-height:60px;border:2px solid #ffffffd9;background:linear-gradient(170deg,#fff,#f8ecff);border-radius:19px;color:var(--ink);display:flex;align-items:center;gap:9px;padding:8px 10px;box-shadow:0 6px 16px #a68eb02b,inset 0 -3px 0 #e9daf385;text-align:left;transition:transform .1s,opacity .15s}
+.power:active:not(:disabled){transform:translateY(2px)}
+.power:disabled{opacity:.52;filter:saturate(.7);cursor:default}
+.power-icon{width:38px;height:38px;border-radius:14px;background:linear-gradient(145deg,#ffe3b7,#ffb4c5);display:grid;place-items:center;flex-shrink:0;font-size:21px;box-shadow:inset 0 2px #fff9}
+#shake-btn .power-icon{background:linear-gradient(145deg,#c7f4e0,#a3c6ff)}
+.power strong{display:block;font-size:12px;font-weight:950;line-height:1.13}
+.power small{display:block;font-size:10px;color:#8a7d9f;margin-top:3px;font-weight:750;line-height:1.13}
+.mini-footer{min-height:23px;display:flex;justify-content:center;align-items:center;flex:none;font-size:10px;color:#a597ab;font-weight:780;text-align:center}
+.overlay{position:absolute;inset:0;z-index:10;background:rgba(66,45,90,.35);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:18px;transition:opacity .2s}
+.overlay.hidden{opacity:0;pointer-events:none}
+.panel{position:relative;width:min(100%,360px);border:3px solid #fff;border-radius:30px;box-shadow:0 22px 70px #5b3c7666;background:linear-gradient(160deg,#fffdf6 0%,#fff0f9 60%,#f0efff 100%);padding:23px 21px 20px;text-align:center}
+.hero-fluff{height:80px;position:relative;margin:0 auto 7px;width:200px}
+.hero-fluff .orb{position:absolute;border-radius:50%;box-shadow:inset -8px -11px 13px #0000000e,inset 6px 8px 14px #ffffff98,0 5px 8px #ad84a744;display:flex;align-items:center;justify-content:center;color:#483750;font-size:25px;font-weight:950}
+.hero-fluff .orb.one{background:#ffc969;width:68px;height:68px;left:35px;top:8px;transform:rotate(-13deg)}
+.hero-fluff .orb.two{background:#ff86ae;width:82px;height:82px;left:87px;top:-3px;transform:rotate(7deg)}
+.hero-fluff .orb.three{background:#80dfd1;width:46px;height:46px;left:2px;top:34px;font-size:18px}
+.panel h1{margin:0;font-weight:1000;line-height:1.05;font-size:29px;letter-spacing:-1.3px;color:#514070}
+.panel h1 em{font-style:normal;color:#fa709e}
+.panel p{font-size:12.5px;line-height:1.5;color:#847795;font-weight:650;margin:10px 0 16px}
+.mode-picker{display:grid;grid-template-columns:1fr 1fr;gap:9px;text-align:left;margin-bottom:15px}
+.mode-choice{border:2px solid #eadcee;border-radius:17px;background:#fff9;padding:12px 9px;text-align:left;min-height:83px;color:#534365}
+.mode-choice.selected{background:#fff0f8;border-color:#ef77a6;box-shadow:0 3px 0 #f9bbd1}
+.mode-choice b{font-size:14px;display:block;font-weight:1000}
+.mode-choice span{font-size:10px;line-height:1.3;display:block;color:#94849f;margin-top:5px;font-weight:700}
+.primary{width:100%;min-height:52px;border-radius:17px;background:linear-gradient(135deg,#ff80aa,#ef5e98);box-shadow:0 7px 0 #d94c81,0 12px 20px #e16d9b4b;border:1px solid #ffb0cb;color:#fff;font-size:16px;font-weight:1000;letter-spacing:.25px}
+.primary:active{transform:translateY(4px);box-shadow:0 3px 0 #d94c81}
+.secondary{margin-top:15px;border:0;background:none;color:#866ba4;font-size:12px;font-weight:900;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.summary-row{display:flex;justify-content:space-evenly;margin:15px 0 22px}
+.summary-row div{min-width:100px;padding:10px;border-radius:16px;background:#ffffffbb;border:1px solid white}
+.summary-row b{display:block;font-size:23px;color:#e86b9a}
+.summary-row small{color:#927f9f;font-size:10px;letter-spacing:1px;font-weight:900}
+#toast{position:absolute;z-index:5;top:28%;left:50%;transform:translate(-50%,0);pointer-events:none;color:#fff;font-weight:1000;font-size:19px;text-shadow:0 3px 0 #a44584,0 6px 12px #74557ba0;opacity:0;white-space:nowrap;transition:opacity .2s, transform .2s}
+#toast.show{opacity:1;transform:translate(-50%,-14px)}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.04)}}
+@media(max-width:360px){.brand-text{font-size:15px}.score-card{padding:7px 10px}.score-card,.preview-card{height:59px}.digit{font-size:23px}.status{min-height:33px}.mode-pill,.time-pill,.combo-pill{padding:6px 8px;font-size:10px}.power{gap:6px;padding:7px 8px}.power-icon{width:34px;height:34px;font-size:18px}.power strong{font-size:11px}.power small{font-size:9px}}
+@media(max-height:670px){#app{padding-top:calc(env(safe-area-inset-top) + 3px);padding-bottom:env(safe-area-inset-bottom)}.topbar{min-height:38px}.brand-icon,.icon-btn{width:32px;height:32px}.scores{margin-top:3px}.score-card,.preview-card{height:56px}.status{margin-top:3px;min-height:29px}.power{min-height:49px}.power-icon{width:31px;height:31px}.mini-footer{min-height:16px;font-size:9px}.digit{font-size:22px}}
+@media(max-height:530px){.scores{grid-template-columns:1fr 62px 1fr}.score-card,.preview-card{height:46px}.board-hint{display:none}.power{min-height:40px}.power-icon{display:none}.mini-footer{display:none}.brand-logo{max-height:40px}}
+.splash-panel{background:linear-gradient(160deg,#fffdf6 0%,#fff3f8 55%,#f0efff 100%)}
+.splash-logo{display:block;width:min(100%,300px);margin:0 auto 10px;border-radius:28px;filter:drop-shadow(0 14px 26px rgba(205,170,145,.26))}
+.splash-sub{font-size:13px;color:#8f7ea1;font-weight:800;margin-top:4px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+:root{--ink:#483364;--muted:#917aab;--pink:#fa5fa6;--purple:#815fe8;--line:#eadcf6}
+#app{background:radial-gradient(circle at 1% 15%,#ffe2949a,transparent 35%),radial-gradient(circle at 96% 42%,#ffaeec8a,transparent 34%),radial-gradient(circle at 15% 98%,#b6f1ee9a,transparent 44%),linear-gradient(180deg,#fff6d9 0%,#fff0ff 50%,#e8f8ff 100%)}
+.brand-icon{background:linear-gradient(140deg,#ffb8dc,#ffe289);border:2px solid #fff;box-shadow:0 4px 0 #de8dc1,0 6px 14px #d892b455}
+.brand-logo{display:block;width:min(43vw,190px);max-height:58px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(179,139,130,.28)) drop-shadow(0 2px 0 rgba(255,255,255,.55));border-radius:16px}
+.icon-btn{font-size:17px;box-shadow:0 4px 0 #e6d7eb,0 6px 14px #956eb224}
+.top-actions{gap:5px}
+.level-ribbon{margin:5px auto 0;flex:none;display:none;align-items:center;gap:9px;width:min(100%,480px);background:linear-gradient(90deg,#fff3b6,#ffe1f7);border:2px solid #fff;border-radius:14px;padding:5px 10px;box-shadow:0 3px 9px #cc99b321}
+.level-ribbon.show{display:flex}.level-info{min-width:0;flex:1}.level-title{font-size:11px;font-weight:1000;color:#8254ae;line-height:1.2}.goal-copy{font-size:10px;color:#a36e9c;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.progress-wrap{height:6px;background:#eacfe4;border-radius:30px;overflow:hidden;margin-top:4px}.progress-bar{width:0;height:100%;background:linear-gradient(90deg,#59cdb8,#e36af2);transition:width .22s}
+.coins-chip{padding:5px 8px;border-radius:999px;background:#fff9e9;border:1px solid #f7d8a4;font-size:11px;font-weight:1000;color:#ad6c27}
+.board-wrap{overflow:visible}
+.jar-caption{display:none}
+.control-bar{position:relative;z-index:1}.power{min-width:0;position:relative;overflow:visible;border:2px solid #fff;background:linear-gradient(145deg,#fff9fd,#f7e5ff);box-shadow:0 5px 0 #e3c8ed,0 9px 16px #a58caa35}
+#shake-btn{background:linear-gradient(145deg,#f2ffed,#d5edff)}.power:not(:disabled) .power-icon{animation:floaty 2.7s ease-in-out infinite}
+.control-bar.alert .power:not(:disabled){animation:power-bounce 1.2s ease-in-out infinite;transform-origin:50% 85%;border-color:#ff94c1;box-shadow:0 4px 0 #f5bad6,0 0 0 3px #ffbcdb65,0 7px 18px #ef84c48c}
+.control-bar.alert .power:not(:disabled):nth-child(2){animation-delay:.35s}.control-bar.alert .power:disabled{animation:none}
+#rescue-tip{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);border-radius:999px;padding:5px 12px;background:#ff70b4;color:#fff;font-size:10px;font-weight:950;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 9px #c454aa43}
+.control-bar.alert #rescue-tip{opacity:1}
+.panel{max-height:min(90dvh,740px);overflow-y:auto;overscroll-behavior:contain}
+.panel h1,.puffy{font-family:ui-rounded,'Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;color:#fff8b3!important;-webkit-text-stroke:1.7px #bd61b9;letter-spacing:-1px;text-shadow:0 2px 0 #ea91c0,0 4px 0 #c668bb,0 6px 0 #9550b4,0 9px 17px #8f52934f;line-height:1.15}
+.panel h1 em{color:#ff92c5!important;-webkit-text-stroke:1.3px #a14ca7}
+.panel h1{font-size:28px;margin-bottom:6px}
+.panel p{margin:7px 0 12px}
+.mode-picker{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.mode-choice{min-height:83px;padding:9px 6px;text-align:center;border-radius:14px}.mode-choice b{font-size:12px}.mode-choice span{font-size:9px}
+.profile-row{display:grid;grid-template-columns:1fr 104px;gap:8px;margin:7px 0 11px}
+.field{min-width:0;width:100%;border:2px solid #e6d2ee;padding:10px 9px;border-radius:12px;color:#6b4d84;background:#fff;font-size:12px;font-weight:850;outline:none;touch-action:manipulation;user-select:text;-webkit-user-select:text}
+.field:focus{border-color:#f478ab}.field-label{display:block;color:#947e9f;font-size:9px;font-weight:1000;text-align:left;margin-bottom:4px;letter-spacing:.5px}
+.menu-links{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:13px;flex-wrap:wrap}
+.mini-btn{border:1px solid #dfc6e9;border-radius:13px;background:#fff9;color:#7657a2;padding:8px 10px;font-size:11px;font-weight:1000;box-shadow:0 2px 0 #dbc4e4}.mini-btn:disabled{opacity:.55;filter:saturate(.75);cursor:not-allowed;box-shadow:0 1px 0 #dbc4e4}
+.level-map{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 15px}
+.level-node{width:100%;aspect-ratio:1;border-radius:50%;border:2px solid #fff;background:linear-gradient(145deg,#ffd575,#ff91bc);box-shadow:0 4px 0 #d76fac,0 7px 11px #bc84a34b;color:#733b7c;font-size:16px;font-weight:1000;position:relative}
+.level-node.done{background:linear-gradient(135deg,#b5f4da,#73d1f3);box-shadow:0 4px 0 #6eb7bc}.level-node.current{outline:3px solid #fb7da9;outline-offset:2px}
+.level-node:disabled{background:#e6e1eb;color:#b3a7bb;box-shadow:0 3px 0 #cdc6d4}.node-stars{font-size:9px;white-space:nowrap;position:absolute;top:88%;left:50%;transform:translateX(-50%);color:#ffb62b;text-shadow:0 1px #a86a2a}
+.panel .tiny{font-size:10px;line-height:1.4;margin:5px 0 10px}
+.reward-stars{font-size:36px;letter-spacing:4px;text-shadow:0 3px #dc9a35;animation:reward-bob 1.4s ease-in-out infinite}
+.summary-row{margin:8px 0 15px;gap:6px}.summary-row div{min-width:0;flex:1}.summary-row b{font-size:20px}
+.leader-list{list-style:none;padding:0;margin:11px 0;max-height:290px;overflow:auto;text-align:left}
+.leader-list li{display:grid;grid-template-columns:25px 26px minmax(0,1fr) auto;align-items:center;gap:5px;background:#fff9;border:1px solid #f1e6f2;border-radius:11px;margin:5px 0;padding:9px 7px;font-size:12px;font-weight:900}
+.leader-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leader-list li b{color:#db699a}
+.leader-tabs{display:flex;gap:5px;justify-content:center;margin-top:10px}.leader-tabs button.active{background:#ffe2f3;border-color:#f18ab9}
+#toast{top:25%;font-size:20px;z-index:6}.sparkle-shake{animation:jar-pop .27s ease-out}
+.overlay:not(.hidden) .panel{animation:panel-in .25s both}
+.primary{background:linear-gradient(150deg,#ff9b69,#f663ac);box-shadow:0 6px 0 #dc4b92,0 9px 18px #cf73a36b}
+@keyframes power-bounce{0%,100%{transform:translateY(0) scale(1)}20%{transform:translateY(-5px) scale(1.02)}38%{transform:translateY(0) scale(1)}55%{transform:translateY(-8px) scale(1.05)}72%{transform:translateY(0) scale(1)}85%{transform:translateY(-3px) scale(1.015)}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes reward-bob{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes panel-in{from{opacity:.6;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes jar-pop{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media(max-width:360px){.brand-logo{width:min(46vw,150px);max-height:49px}.profile-row{grid-template-columns:1fr 93px}.panel{padding:18px 14px}.level-map{gap:6px}.level-node{font-size:14px}.mode-choice span{font-size:8px}.level-ribbon{padding:4px 7px}.jar-caption{font-size:9px}}
+@media(max-height:670px){.level-ribbon{margin-top:2px;padding:3px 9px}.level-title{font-size:10px}.goal-copy{font-size:9px}.jar-caption{top:16px}.panel .hero-fluff{height:52px;transform:scale(.75);transform-origin:top center;margin-bottom:-9px}.brand-logo{max-height:48px}}
+@media(max-height:530px){.level-ribbon{padding:2px 5px}.progress-wrap{margin-top:2px}.jar-caption{display:none}}
+
+/* Fluffy Jar: golden challenge visual refinements */
+/* Keep alerts above the glass opening instead of covering the characters. */
+#toast{top:7px;max-width:calc(100% - 28px);padding:7px 12px;border-radius:30px;border:1.5px solid #ffffffd8;background:linear-gradient(135deg,#fff7dbed,#ffe5f2ed);color:#98619e;box-shadow:0 5px 15px #d6b7a65c;text-shadow:none;white-space:normal;text-align:center;font-size:11px;line-height:1.15;letter-spacing:.2px}
+#toast.show{transform:translate(-50%,0)}
+.welcome-jar-art{display:block;width:168px;height:123px;margin:0 auto 0;overflow:visible;filter:drop-shadow(0 9px 10px rgba(200,134,102,.18));animation:mini-jar-float 3.8s ease-in-out infinite}
+@keyframes mini-jar-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+#welcome .panel h1{font-size:32px;letter-spacing:-1.4px;margin-top:4px}
+#welcome .panel{padding-top:14px;padding-bottom:15px}
+#welcome .panel p{margin:7px 0 13px}
+#goal-copy{white-space:normal;overflow:visible;text-overflow:clip;font-size:10px;line-height:1.35;min-height:13px}
+.level-ribbon{min-height:49px}
+#time-label.story-moves{background:linear-gradient(135deg,#ffe8a8,#fff4d9);border-color:#f3cb73;color:#96631e}
+#time-label.story-moves.low{background:#ffcfce;color:#bd3c63;animation:pulse .7s alternate infinite}
+@media(max-width:360px){.welcome-jar-art{height:105px;width:146px}#welcome .panel h1{font-size:28px}#welcome .panel{padding:13px 12px 12px}#goal-copy{font-size:9.5px}}
+@media(max-height:710px){.welcome-jar-art{width:132px;height:100px}#welcome .panel h1{font-size:26px}#welcome .panel{padding-top:10px;padding-bottom:10px}}
+
+/* Story Mode: one clear mission plus an optional score-based star track. */
+.level-ribbon{min-height:69px}
+.bonus-copy{font-size:9.5px;color:#a477aa;font-weight:850;line-height:1.3;margin-top:3px;white-space:normal}
+.bonus-progress-wrap{height:4px;background:#f2d9d5;margin-top:3px}
+.bonus-progress-bar{background:linear-gradient(90deg,#ffbf63,#ff84b2)}
+@media(max-width:360px){.bonus-copy{font-size:9px}}
+@media(max-height:670px){.level-ribbon{min-height:58px;padding-top:4px;padding-bottom:4px}.bonus-copy{font-size:9px;margin-top:2px}.bonus-progress-wrap{margin-top:2px}}
+
+/* 100-level release: recover play-field height without hiding either objective. */
+.topbar{min-height:51px}
+.header-jar-art{display:block;width:99px;height:58px;max-height:58px;overflow:visible;filter:drop-shadow(0 3px 5px rgba(201,139,67,.25))}
+.scores{margin-top:2px}
+.score-card,.preview-card{height:59px}
+.status{min-height:29px;margin-top:3px}
+.mode-pill,.time-pill,.combo-pill{padding:6px 9px}
+.level-ribbon{min-height:0!important;margin-top:3px;padding:4px 9px;gap:6px;border-radius:13px}
+.level-title{font-size:10px;line-height:1.08}
+#goal-copy{min-height:0;line-height:1.08;font-size:9.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-wrap{height:4px;margin-top:2px}
+.bonus-copy{font-size:9px;line-height:1.08;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bonus-progress-wrap{height:3px;margin-top:2px}
+.control-bar{margin-top:1px}
+.power{min-height:55px}
+.mini-footer{min-height:15px}
+/* The level map holds 100 levels in ten compact, scrollable chapters. */
+.level-map{max-height:min(48dvh,390px);overflow-y:auto;overscroll-behavior:contain;align-content:start;row-gap:12px;padding:5px 4px 18px;scrollbar-width:thin;scrollbar-color:#e8a9cd #fff8fb}
+.chapter-label{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;font-weight:950;color:#9161aa;text-align:left;font-size:11px;letter-spacing:.2px;padding:5px 5px 3px;border-bottom:1px solid #edd5ea}
+.chapter-label small{font-size:9px;color:#ba90c1}
+@media(max-width:360px){.header-jar-art{width:90px;height:53px}.level-ribbon{padding:3px 7px}.bonus-copy{font-size:8.5px}#goal-copy{font-size:9px}.level-map{row-gap:10px}}
+@media(max-height:670px){.topbar{min-height:43px}.header-jar-art{width:82px;height:46px}.score-card,.preview-card{height:52px}.level-ribbon{padding-top:3px;padding-bottom:3px}.power{min-height:49px}}
+
+/* Optional rewarded continue. Works gracefully without the Android ad bridge. */
+.continue-panel{padding:20px 17px 19px}
+.continue-panel .hero-fluff{height:65px;transform:scale(.82);transform-origin:top center;margin-bottom:-5px}
+.continue-panel h1{font-size:28px}
+.continue-summary{margin:12px 0}
+.continue-summary div{min-width:0;flex:1}
+.continue-summary b{font-size:20px}
+.continue-reward{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px solid #fff;border-radius:18px;background:linear-gradient(145deg,#ffebc0,#ffe3f3);padding:12px;margin:10px 0 14px;color:#8b4c93;font-weight:950}
+.continue-reward strong{font-size:18px;color:#d9569d}
+.continue-reward small{font-size:11px;color:#846b91;line-height:1.4;max-width:240px}
+#continue-watch:disabled{opacity:.52;filter:grayscale(.28);box-shadow:0 3px 0 #cf9bb2;cursor:default}
+.continue-message{min-height:18px;font-size:11px!important;margin:11px 0 0!important}
+#continue-retry{margin-top:7px}
+.privacy-choice{font-size:10px!important}
+@media(max-height:650px){.continue-panel{padding:11px 14px}.continue-panel .hero-fluff{height:48px;transform:scale(.63);margin-bottom:-15px}.continue-panel p{margin:6px 0}.continue-reward{padding:7px;margin:6px 0}.continue-summary{margin:6px 0}}
+</style></head><body>
+<div id="app">
+<header class="topbar shell">
+ <div class="brand" id="header-jar-logo" aria-label="Fluffy Jar — four smiling fluffies in a shiny jar"></div>
+ <div class="top-actions"><button id="leader-btn" class="icon-btn" title="Leaderboard" aria-label="Open leaderboard">🏆</button><button id="audio-btn" class="icon-btn" aria-label="Mute sound effects">🔊</button><button id="pause-btn" class="icon-btn" aria-label="Pause game">⏸</button></div>
+</header>
+<section class="scores shell"><div class="score-card"><span class="kicker">SCORE</span><span id="score" class="digit">0</span></div><div class="preview-card"><span class="kicker">NEXT</span><canvas id="next-preview" aria-label="Next fluffy"></canvas></div><div class="score-card"><span class="kicker">BEST</span><span id="best" class="digit">0</span></div></section>
+<div class="status shell"><div class="mode-pill" id="mode-label">🌈 STORY MODE</div><div class="combo-pill" id="combo-label">✨ MAKE A COMBO</div><div class="time-pill" id="time-label">NO TIMER</div></div>
+<div id="level-ribbon" class="level-ribbon"><div class="level-info"><div class="level-title" id="level-title">⭐ LEVEL 1</div><div class="goal-copy" id="goal-copy">Merge fluffies</div><div class="progress-wrap"><div class="progress-bar" id="goal-progress"></div></div><div class="bonus-copy" id="bonus-copy">Bonus score earns stars</div><div class="progress-wrap bonus-progress-wrap"><div class="progress-bar bonus-progress-bar" id="bonus-progress"></div></div></div><span class="coins-chip" id="coin-display">🪙 0</span></div>
+<div class="board-wrap"><div class="board-hint" id="board-hint"></div><canvas id="board" aria-label="Colorful fluffy merge game jar" role="img"></canvas><div class="jar-caption" id="jar-caption"></div><div id="toast" aria-live="polite"></div><div class="danger"><span id="danger-fill"></span></div></div>
+<div class="control-bar shell" id="power-bar"><div id="rescue-tip">💗 Save your fluffy friends!</div><button id="hold-btn" class="power" aria-label="Hold or swap fluffy"><span class="power-icon">🫴</span><span><strong>HOLD / SWAP</strong><small id="hold-info">Save a fluffy!</small></span></button><button id="shake-btn" class="power" aria-label="Magic Shake"><span class="power-icon">🪄</span><span><strong>MAGIC SHAKE</strong><small id="shake-info">0 / 3 merges</small></span></button></div>
+<footer class="mini-footer shell" id="footer-help">Drop • Merge • Save • Collect stars!</footer>
+<div class="overlay" id="welcome" role="dialog" aria-modal="true" aria-label="Start Fluffy Jar"><div class="panel">
+<svg class="welcome-jar-art" viewBox="0 0 190 148" role="img" aria-label="A tiny shiny golden jar filled with happy colorful fluffies">
+<defs><linearGradient id="artGlass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffefa" stop-opacity=".93"/><stop offset=".47" stop-color="#ffddec" stop-opacity=".49"/><stop offset="1" stop-color="#d9f4ff" stop-opacity=".76"/></linearGradient><linearGradient id="artGold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff9bb"/><stop offset=".22" stop-color="#ffe573"/><stop offset=".54" stop-color="#d69626"/><stop offset=".8" stop-color="#ffe78a"/><stop offset="1" stop-color="#a96814"/></linearGradient><linearGradient id="artRim" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff5c5"/><stop offset=".5" stop-color="#f7cc55"/><stop offset="1" stop-color="#ba791b"/></linearGradient><filter id="jarSoftShadow"><feGaussianBlur stdDeviation="5"/></filter><clipPath id="jarArtClip"><path d="M43 39 Q28 41 28 59 L28 108 Q28 129 49 131 L141 131 Q162 129 162 108 L162 59 Q162 41 147 39Z"/></clipPath></defs>
+<ellipse cx="95" cy="134" rx="68" ry="9" fill="#bd84b2" opacity=".17" filter="url(#jarSoftShadow)"/>
+<g clip-path="url(#jarArtClip)">
+<path d="M28 42H162V131H28Z" fill="url(#artGlass)"/>
+<circle cx="60" cy="103" r="27" fill="#ff8bb9" stroke="#ffbad5" stroke-width="3"/><circle cx="112" cy="109" r="28" fill="#a890fa" stroke="#d1befc" stroke-width="3"/>
+<circle cx="88" cy="64" r="30" fill="#ffd96f" stroke="#ffedaa" stroke-width="3"/><circle cx="144" cy="78" r="20" fill="#7ce1d3" stroke="#b7f9e7" stroke-width="3"/>
+<g fill="#534363"><circle cx="52" cy="102" r="3.5"/><circle cx="67" cy="102" r="3.5"/><circle cx="104" cy="108" r="3.7"/><circle cx="120" cy="108" r="3.7"/><circle cx="81" cy="63" r="4"/><circle cx="97" cy="63" r="4"/><circle cx="139" cy="77" r="2.7"/><circle cx="150" cy="77" r="2.7"/></g>
+<g fill="none" stroke="#534363" stroke-width="2.6" stroke-linecap="round"><path d="M55 111Q60 117 66 111"/><path d="M106 117Q112 123 118 117"/><path d="M83 74Q89 81 96 74"/><path d="M141 84Q145 89 150 84"/></g>
+<g fill="#fff" opacity=".38"><ellipse cx="51" cy="91" rx="9" ry="5" transform="rotate(-25 51 91)"/><ellipse cx="83" cy="51" rx="11" ry="5" transform="rotate(-25 83 51)"/><ellipse cx="106" cy="96" rx="10" ry="4" transform="rotate(-25 106 96)"/></g></g>
+<path d="M43 39 Q28 41 28 59 L28 108 Q28 129 49 131 L141 131 Q162 129 162 108 L162 59 Q162 41 147 39" fill="none" stroke="url(#artGold)" stroke-width="7" stroke-linecap="round"/>
+<path d="M44 44 Q37 48 37 61 L37 112" fill="none" stroke="#ffffff" opacity=".88" stroke-width="4" stroke-linecap="round"/>
+<path d="M147 43 Q155 49 155 66 L155 102" fill="none" stroke="#fff6c0" opacity=".75" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="95" cy="40" rx="68" ry="11" fill="url(#artRim)" stroke="#c99736" stroke-width="3"/>
+<ellipse cx="95" cy="40" rx="56" ry="5" fill="#fff6dc" opacity=".78"/>
+<path d="M49 131Q95 142 141 131" stroke="url(#artGold)" stroke-width="7" fill="none" stroke-linecap="round"/>
+<g fill="#fff6b6"><path d="M24 22l3 7 8 3-8 3-3 8-3-8-8-3 8-3Z"/><path d="M166 48l2 5 6 2-6 2-2 5-2-5-6-2 6-2Z"/><circle cx="161" cy="21" r="3"/></g></svg>
+<h1>FLUFFY <em>JAR</em></h1><p>Save your little fluffy friends, finish cute missions, and discover bigger, happier merges!</p>
+<div class="profile-row"><label><span class="field-label">PLAYER NAME</span><input id="player-name" class="field" maxlength="16" placeholder="Your name" autocomplete="nickname"></label><label><span class="field-label">COUNTRY FLAG</span><select id="player-country" class="field" aria-label="Country flag"><option value="🇵🇰">🇵🇰 PAK</option><option value="🇦🇪">🇦🇪 UAE</option><option value="🇮🇳">🇮🇳 IND</option><option value="🇺🇸">🇺🇸 USA</option><option value="🇬🇧">🇬🇧 GBR</option><option value="🇨🇦">🇨🇦 CAN</option><option value="🇧🇩">🇧🇩 BGD</option><option value="🇳🇵">🇳🇵 NPL</option><option value="🇵🇭">🇵🇭 PHL</option><option value="🇸🇦">🇸🇦 SAU</option><option value="🇪🇬">🇪🇬 EGY</option><option value="🇹🇷">🇹🇷 TUR</option><option value="🇩🇪">🇩🇪 DEU</option><option value="🇫🇷">🇫🇷 FRA</option><option value="🇧🇷">🇧🇷 BRA</option><option value="🇯🇵">🇯🇵 JPN</option><option value="🇦🇺">🇦🇺 AUS</option><option value="🌍">🌍 OTH</option></select></label></div>
+<div class="mode-picker"><button class="mode-choice selected" id="choice-story" aria-pressed="true"><b>🗺️ Story</b><span>100 levels + gifts</span></button><button class="mode-choice" id="choice-classic" aria-pressed="false"><b>🌈 Classic</b><span>Endless high scores</span></button><button class="mode-choice" id="choice-rush" aria-pressed="false"><b>⚡ Rush</b><span>90s, +2s per merge</span></button></div>
+<button id="start-btn" class="primary">PLAY STORY! ⭐</button><div class="menu-links"><button id="map-btn" class="mini-btn">🗺️ LEVEL MAP</button><button id="menu-leader-btn" class="mini-btn">🏆 LEADERBOARD</button><button id="privacy-choice" class="mini-btn privacy-choice" hidden>PRIVACY CHOICES</button><span class="coins-chip" id="menu-coins">🪙 0</span></div>
+</div></div>
+<div class="overlay hidden" id="levels-overlay" role="dialog" aria-modal="true" aria-label="Level map"><div class="panel"><h1>FLUFFY <em>ADVENTURE</em></h1><p>Finish missions to unlock the next plushy jar!</p><div id="level-map" class="level-map"></div><div id="map-details" class="tiny">Pick an unlocked level</div><button id="map-play-btn" class="primary">PLAY LEVEL 1 ✨</button><button id="map-back-btn" class="secondary">Back to menu</button></div></div>
+<div class="overlay hidden" id="leader-overlay" role="dialog" aria-modal="true" aria-label="Local leaderboard"><div class="panel"><h1>FLUFFY <em>CHAMPIONS</em></h1><p>Scores stored on this device. No fake online players.</p><div class="leader-tabs"><button class="mini-btn active" data-leader="story">Story</button><button class="mini-btn" data-leader="classic">Classic</button><button class="mini-btn" data-leader="rush">Rush</button></div><ol id="leader-list" class="leader-list"></ol><button class="primary" id="leader-close">BACK TO GAME</button></div></div>
+<div class="overlay hidden" id="pause-overlay" role="dialog" aria-modal="true" aria-label="Game paused"><div class="panel"><div class="hero-fluff"><span class="orb one">•ᴗ•</span><span class="orb two">-ᴗ-</span><span class="orb three">•ᴗ•</span></div><h1>PAUSED 💗</h1><p>Catch your breath. Your fluffies are safe!</p><button id="resume-btn" class="primary">KEEP PLAYING</button><button id="pause-menu-btn" class="secondary">Back to menu</button></div></div>
+<div class="overlay hidden" id="win-overlay" role="dialog" aria-modal="true" aria-label="Level completed"><div class="panel"><div class="hero-fluff"><span class="orb one">^ᴗ^</span><span class="orb two">◕ᴗ◕</span><span class="orb three">♥ᴗ♥</span></div><h1>LEVEL <em>CLEAR!</em> 🎉</h1><div id="win-stars" class="reward-stars">⭐⭐⭐</div><p id="win-description">Your fluffies are cheering!</p><div class="summary-row"><div><b id="win-score">0</b><small>SCORE</small></div><div><b id="win-coins">+20</b><small>COINS WON</small></div><div><b id="win-total">0</b><small>COINS TOTAL</small></div></div><button id="next-level-btn" class="primary">NEXT LEVEL ➜</button><button id="win-map-btn" class="secondary">Level map</button></div></div>
+<div class="overlay hidden" id="over-overlay" role="dialog" aria-modal="true" aria-label="Game over"><div class="panel"><div class="hero-fluff"><span class="orb one">×ᴗ×</span><span class="orb two">•︵•</span><span class="orb three">•ᴥ•</span></div><h1 id="over-title">JAR OVERFLOW!</h1><p id="over-copy">Try another strategy and rescue them!</p><div class="summary-row"><div><b id="final-score">0</b><small>SCORE</small></div><div><b id="final-best">0</b><small>BEST</small></div></div><button id="again-btn" class="primary">TRY AGAIN ↻</button><button id="over-menu-btn" class="secondary">Back to menu</button></div></div>
+<div class="overlay hidden" id="continue-overlay" role="dialog" aria-modal="true" aria-label="Optional extra drops">
+  <div class="panel continue-panel">
+    <div class="hero-fluff" aria-hidden="true"><span class="orb one">•︵•</span><span class="orb two">◕ᴗ◕</span><span class="orb three">•ᴗ•</span></div>
+    <h1>SO <em>CLOSE!</em> 💗</h1>
+    <p>Your fluffies can still finish the mission!</p>
+    <div class="summary-row continue-summary">
+      <div><b id="continue-merges">0/0</b><small>MERGE POINTS</small></div>
+      <div><b id="continue-drops">0</b><small>DROPS LEFT</small></div>
+    </div>
+    <div class="continue-reward">✨ <strong>+3 EXTRA DROPS</strong><small>Watch one optional rewarded ad to keep playing this level.</small></div>
+    <button class="primary" id="continue-watch" disabled>CHECKING AD…</button>
+    <p id="continue-message" class="continue-message" aria-live="polite">You can always retry for free.</p>
+    <button class="secondary" id="continue-retry">RETRY LEVEL ↻</button>
+  </div>
+</div>
+
+</div>
+<script>(()=>{
+'use strict';
+const $=id=>document.getElementById(id),clamp=(n,a,b)=>Math.max(a,Math.min(n,b)),rnd=(a,b)=>a+Math.random()*(b-a),fmt=n=>Math.round(n).toLocaleString();
+const TYPES=[{r:14,c:'#ff719b',score:2},{r:20,c:'#61d9c6',score:4},{r:27,c:'#ffd366',score:8},{r:35,c:'#b895ff',score:16},{r:44,c:'#75bcfa',score:32},{r:54,c:'#9ddd5f',score:64},{r:65,c:'#f8a874',score:128},{r:76,c:'#76ddb2',score:256},{r:88,c:'#d09bff',score:512},{r:100,c:'#72d8f2',score:1024},{r:113,c:'#f6b24e',score:2048}];
+const LEVELS=[
+{n:1,type:'merges',goal:10,label:'Earn 10 merge points',par:33,reward:26,bonusScore:190,maxDrops:31},
+{n:2,type:'merges',goal:12,label:'Earn 12 merge points',par:35,reward:32,bonusScore:280,maxDrops:32},
+{n:3,type:'merges',goal:14,label:'Earn 14 merge points',par:37,reward:38,bonusScore:420,maxDrops:33},
+{n:4,type:'merges',goal:16,label:'Earn 16 merge points',par:39,reward:44,bonusScore:600,maxDrops:34},
+{n:5,type:'merges',goal:18,label:'Earn 18 merge points',par:40,reward:50,bonusScore:800,maxDrops:35},
+{n:6,type:'merges',goal:20,label:'Earn 20 merge points',par:41,reward:56,bonusScore:1050,maxDrops:36},
+{n:7,type:'merges',goal:21,label:'Earn 21 merge points',par:42,reward:62,bonusScore:1320,maxDrops:37},
+{n:8,type:'merges',goal:23,label:'Earn 23 merge points',par:44,reward:68,bonusScore:1650,maxDrops:38},
+{n:9,type:'merges',goal:25,label:'Earn 25 merge points',par:45,reward:74,bonusScore:2100,maxDrops:39},
+{n:10,type:'merges',goal:27,label:'Earn 27 merge points',par:46,reward:80,bonusScore:2700,maxDrops:40},
+{n:11,type:'merges',goal:28,label:'Earn 28 merge points',par:47,reward:86,bonusScore:2950,maxDrops:41},
+{n:12,type:'merges',goal:29,label:'Earn 29 merge points',par:48,reward:92,bonusScore:3220,maxDrops:42},
+{n:13,type:'merges',goal:30,label:'Earn 30 merge points',par:49,reward:98,bonusScore:3500,maxDrops:43},
+{n:14,type:'merges',goal:31,label:'Earn 31 merge points',par:50,reward:104,bonusScore:3790,maxDrops:44},
+{n:15,type:'merges',goal:32,label:'Earn 32 merge points',par:51,reward:110,bonusScore:4090,maxDrops:45},
+{n:16,type:'merges',goal:33,label:'Earn 33 merge points',par:52,reward:116,bonusScore:4400,maxDrops:46},
+{n:17,type:'merges',goal:34,label:'Earn 34 merge points',par:53,reward:122,bonusScore:4720,maxDrops:47},
+{n:18,type:'merges',goal:35,label:'Earn 35 merge points',par:54,reward:128,bonusScore:5050,maxDrops:48},
+{n:19,type:'merges',goal:36,label:'Earn 36 merge points',par:55,reward:134,bonusScore:5390,maxDrops:49},
+{n:20,type:'merges',goal:37,label:'Earn 37 merge points',par:56,reward:140,bonusScore:5740,maxDrops:50},
+{n:21,type:'merges',goal:38,label:'Earn 38 merge points',par:57,reward:146,bonusScore:6100,maxDrops:51},
+{n:22,type:'merges',goal:39,label:'Earn 39 merge points',par:58,reward:152,bonusScore:6470,maxDrops:52},
+{n:23,type:'merges',goal:40,label:'Earn 40 merge points',par:59,reward:158,bonusScore:6850,maxDrops:53},
+{n:24,type:'merges',goal:41,label:'Earn 41 merge points',par:60,reward:164,bonusScore:7240,maxDrops:54},
+{n:25,type:'merges',goal:42,label:'Earn 42 merge points',par:61,reward:170,bonusScore:7640,maxDrops:55},
+{n:26,type:'merges',goal:43,label:'Earn 43 merge points',par:62,reward:176,bonusScore:8050,maxDrops:56},
+{n:27,type:'merges',goal:44,label:'Earn 44 merge points',par:63,reward:182,bonusScore:8470,maxDrops:57},
+{n:28,type:'merges',goal:45,label:'Earn 45 merge points',par:64,reward:188,bonusScore:8900,maxDrops:58},
+{n:29,type:'merges',goal:46,label:'Earn 46 merge points',par:65,reward:194,bonusScore:9340,maxDrops:59},
+{n:30,type:'merges',goal:47,label:'Earn 47 merge points',par:66,reward:200,bonusScore:9790,maxDrops:60},
+// Levels 31-100: tighten the move budget from 59 to 46; raise merge target only 48 to 54.
+// Chapters are ten levels each. Optional bonus scores earn stars, not level completion.
+...Array.from({length:70},(_,i)=>{
+ const n=i+31, step=n-30;
+ const goal=47+Math.ceil(step/10);
+ const maxDrops=60-Math.ceil(step/5);
+ const bonusScore=9790+90*step;
+ return {n,type:'merges',goal,label:`Earn ${goal} merge points`,par:maxDrops+5,reward:20+n*6,bonusScore,maxDrops};
+})
+];
+const N=LEVELS.length;
+const themes=[{id:'sugar',label:'🍭 Sugar Jar',cost:0,stroke:'#8bb8e8',glass:'#e0f8ff'},{id:'berry',label:'🍓 Berry Jar',cost:90,stroke:'#ff8fbd',glass:'#ffe3f7'},{id:'mint',label:'🌿 Mint Jar',cost:150,stroke:'#53c6b3',glass:'#dcfff0'},{id:'galaxy',label:'🌌 Galaxy Jar',cost:240,stroke:'#a48bfa',glass:'#e4ddff'}];
+const safeGet=(k,f)=>{try{const s=localStorage.getItem(k);return s===null?f:JSON.parse(s)}catch(_){return f}};
+const safeSave=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}};
+let profile=safeGet('fluffy3_profile',{name:'Player',flag:'🇵🇰'});if(!profile||typeof profile!=='object')profile={name:'Player',flag:'🇵🇰'};
+let progress=safeGet('fluffy3_progress',{unlocked:1,stars:{},coins:0,owned:['sugar'],theme:'sugar',lastDaily:''});
+if(!progress||typeof progress!=='object')progress={unlocked:1,stars:{},coins:0,owned:['sugar'],theme:'sugar',lastDaily:''};
+progress.unlocked=clamp(Number(progress.unlocked)||1,1,N);progress.stars=progress.stars||{};progress.coins=Math.max(0,Number(progress.coins)||0);progress.owned=Array.isArray(progress.owned)?progress.owned:['sugar'];if(!progress.owned.includes('sugar'))progress.owned.push('sugar');if(!themes.some(t=>t.id===progress.theme))progress.theme='sugar';
+// Existing 30/30 finishers should be able to play level 31 after this upgrade.
+if(progress.unlocked<=30&&Number(progress.stars[30]||0)>0){progress.unlocked=31;safeSave('fluffy3_progress',progress)}
+let board=safeGet('fluffy3_leaderboard',[]);if(!Array.isArray(board))board=[];
+const canvas=$('board'),c=canvas.getContext('2d'),next=$('next-preview'),nc=next.getContext('2d');
+let w=360,h=450,dpr=1,scale=1,jar={left:30,right:330,top:100,bottom:420,danger:138};
+let balls=[],fx=[],textFx=[],rings=[],celebrateQueue=[],lastDropDeadline=0,score=0,best=0,tier=0,nextTier=0,held=null,holdCooldown=0,nextId=1;
+let dropX=180,dropLock=0,activePointer=null,touching=false,mode='story',selectedMode='story',state='menu',levelNumber=progress.unlocked,chosenLevel=levelNumber;
+let timeLeft=90,overflow=0,shakeProgress=0,shakes=0,combo=0,maxCombo=0,lastMerge=-999,lastFrame=0,toastUntil=0,milestone=250,alertedDanger=false;
+let mergeCount=0,highestTier=0,drops=0,fullness=0,flash=0,screenKick=0,leaderMode='story',returnFromLeader='menu',returnFromMap='menu',winTimer=0,earnedStars=0,earnedCoins=0;
+// The reward is per attempt, never per ad display. Save the attempt at the rescue boundary.
+let dropBudgetExtra=0,continueUsed=false,continuePending=false,attemptId='',pendingTransition=false;
+const CONTINUE_KEY='fluffy4_rewarded_attempt';
+// AD-FREE BUILD: set ADS_ENABLED=true only after AdMob is added back to the Android code (see ads_backup/HOW_TO_ADD_ADS_BACK.md).
+const ADS_ENABLED=false;
+const nativeAds=()=>ADS_ENABLED&&window.FluffyAds&&typeof window.FluffyAds.requestRewardedContinue==='function'?window.FluffyAds:null;
+function newAttemptId(){return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12)}
+function attemptSnapshot(){return {version:1,attemptId,level:levelNumber,mode,dropBudgetExtra,continueUsed,score,best,balls:balls.map(b=>({...b})),tier,nextTier,held,holdCooldown,dropHistory:dropHistory.slice(),dropX,mergeCount,highestTier,drops,shakes,shakeProgress,combo,maxCombo,lastMerge,fullness,overflow,winStars:earnedStars,storedAt:Date.now()}}
+function saveAttemptCheckpoint(){if(mode!=='story'||(!continueUsed&&state!=='rescue'&&state!=='ad_pending'))return;safeSave(CONTINUE_KEY,attemptSnapshot())}
+function clearAttemptCheckpoint(){try{localStorage.removeItem(CONTINUE_KEY)}catch(_){}}
+function restoreAttemptCheckpoint(){
+ if(!ADS_ENABLED){clearAttemptCheckpoint();return false}
+ const snap=safeGet(CONTINUE_KEY,null);
+ if(!snap||snap.version!==1||snap.mode!=='story'||!Number.isInteger(snap.level)||snap.level<6||snap.level>N||!Array.isArray(snap.balls)||typeof snap.attemptId!=='string'||Date.now()-(snap.storedAt||0)>2*86400000){clearAttemptCheckpoint();return false}
+ mode='story';levelNumber=snap.level;attemptId=snap.attemptId;dropBudgetExtra=Math.max(0,Math.min(3,Number(snap.dropBudgetExtra)||0));continueUsed=Boolean(snap.continueUsed);continuePending=false;
+ score=Number(snap.score)||0;best=Number(snap.best)||0;
+ balls=snap.balls.map(b=>({...b,r:radius(b.tier)}));tier=snap.tier||0;nextTier=snap.nextTier||0;held=snap.held??null;holdCooldown=snap.holdCooldown||0;dropHistory=Array.isArray(snap.dropHistory)?snap.dropHistory:[];dropX=snap.dropX||w/2;
+ mergeCount=snap.mergeCount||0;highestTier=snap.highestTier||0;drops=snap.drops||0;shakes=snap.shakes||0;shakeProgress=snap.shakeProgress||0;combo=snap.combo||0;maxCombo=snap.maxCombo||0;lastMerge=snap.lastMerge||-999;fullness=snap.fullness||0;overflow=snap.overflow||0;
+ $('score').textContent=fmt(score);$('best').textContent=fmt(best);$('mode-label').textContent='🗺️ STORY';$('time-label').classList.add('story-moves');$('level-ribbon').classList.add('show');drawNext();updateGoal();
+ allClosed();state=continueUsed?'playing':'rescue';if(state==='rescue'){setOverlay('continue-overlay',true);renderContinueScreen()}updatePowers();coinsUI();lastFrame=0;return true
+}
+function renderContinueScreen(message){
+ $('continue-merges').textContent=`${fmt(Math.min(mergeCount,LEVELS[levelNumber-1].goal))}/${fmt(LEVELS[levelNumber-1].goal)}`;
+ $('continue-drops').textContent='0';
+ const ready=nativeAds()?.getAdStatus?.()==='ready';
+ const available=Boolean(nativeAds());
+ const btn=$('continue-watch');btn.disabled=!ready||continuePending||continueUsed;
+ btn.textContent=continuePending?'OPENING AD…':!available?'ADS AVAILABLE IN ANDROID APP':ready?'▶ WATCH AD • GET +3 DROPS':'AD NOT READY';
+ $('continue-message').textContent=message||(!available?'This HTML version supports free retries. Rewarded ads require the Android app.':ready?'Optional. You can retry for free instead.':'No ad available right now. You can retry for free.');
+}
+function offerContinue(){
+ if(!ADS_ENABLED||state!=='playing'||mode!=='story'||levelNumber<6||continueUsed){return false}
+ state='rescue';continuePending=false;touching=false;activePointer=null;lastDropDeadline=0;updatePowers();saveAttemptCheckpoint();allClosed();setOverlay('continue-overlay',true);renderContinueScreen();return true
+}
+function grantRewardedDrops(id){
+ if(id!==attemptId||continueUsed||mode!=='story')return;
+ continueUsed=true;continuePending=false;dropBudgetExtra=3;lastDropDeadline=0;
+ state='playing';setOverlay('continue-overlay',false);dropLock=0;updateGoal();updatePowers();saveAttemptCheckpoint();
+ try{nativeAds()?.acknowledgeReward?.(id)}catch(_){}
+ notify('+3 FLUFFY DROPS! 💗',1700);lastFrame=0
+}
+window.FluffyGameAds={
+ onStatus(s){if(state==='rescue')renderContinueScreen()},
+ onRewardResult(id,result){if(id!==attemptId)return;continuePending=false;if(result==='earned'){grantRewardedDrops(id);return}if(state==='ad_pending'){state='rescue';setOverlay('continue-overlay',true)}renderContinueScreen(result==='cancelled'?'Ad closed before earning the reward. Retry is always free.':'Ad unavailable. You can retry without watching.');},
+ onTransitionFinished(){if(!pendingTransition)return;pendingTransition=false;begin('story',Math.min(N,levelNumber+1));},
+ onPrivacyOptionsAvailable(required){$('privacy-choice').hidden=!(required===true||required==='true')}
+};
+function startRewardedContinue(){if(state!=='rescue'||continuePending||continueUsed||!nativeAds()||nativeAds().getAdStatus()!=='ready')return;continuePending=true;state='ad_pending';saveAttemptCheckpoint();renderContinueScreen('Opening your optional rewarded ad…');try{nativeAds().requestRewardedContinue(attemptId)}catch(_){continuePending=false;state='rescue';renderContinueScreen('Ad unavailable. Free retry is always available.')}}
+function proceedNextLevel(){if(state!=='win'||pendingTransition)return;const next=Math.min(N,levelNumber+1);if(levelNumber===N){begin('story',N);return}const bridge=nativeAds();if(levelNumber>=5&&levelNumber%5===0&&bridge?.showLevelTransitionInterstitial){pendingTransition=true;try{bridge.showLevelTransitionInterstitial(levelNumber);return}catch(_){pendingTransition=false}}begin('story',next)}
+
+const sounds={muted:false,audio:null,
+ init(){if(this.muted)return;try{if(!this.audio)this.audio=new(window.AudioContext||window.webkitAudioContext)();if(this.audio.state==='suspended')this.audio.resume().catch(()=>{})}catch(_){this.muted=true}},
+ sweep(base,end,duration,gain,kind='sine',delay=0){if(this.muted)return;this.init();if(!this.audio)return;try{const A=this.audio,t=A.currentTime+delay,o=A.createOscillator(),g=A.createGain();o.type=kind;o.frequency.setValueAtTime(base,t);o.frequency.exponentialRampToValueAtTime(Math.max(35,end),t+duration);g.gain.setValueAtTime(.001,t);g.gain.linearRampToValueAtTime(gain,t+.014);g.gain.exponentialRampToValueAtTime(.001,t+duration);o.connect(g);g.connect(A.destination);o.start(t);o.stop(t+duration+.02)}catch(_){ }},
+ drop(){this.sweep(350,160,.12,.09,'sine');this.sweep(920,520,.06,.032,'triangle',.03)},
+ merge(t){this.sweep(300+t*24,760+t*28,.16,.13,'sine');this.sweep(650+t*38,1120+t*30,.12,.065,'triangle',.035);this.sweep(980+t*15,1450+t*18,.09,.038,'sine',.085)},
+ big(t){this.sweep(120,65,.30,.15,'triangle');this.sweep(460+t*16,1120+t*28,.25,.15,'sine',.05);this.sweep(980,1820,.20,.07,'triangle',.11);this.sweep(1380,720,.23,.05,'sine',.17);this.sweep(1780,2350,.15,.03,'triangle',.22)},
+ shake(){this.sweep(170,450,.25,.10,'triangle');this.sweep(600,260,.18,.06,'sine',.10)},
+ success(){this.big(5);this.sweep(760,1480,.35,.09,'sine',.18);this.sweep(1180,2080,.24,.05,'triangle',.28)},
+ fail(){this.sweep(280,105,.37,.06,'triangle')},
+ vibrate(p){try{navigator.vibrate?.(p)}catch(_){}}
+};
+let dropHistory=[];
+function randomTier(){
+ const variety=5; // natural drops capped at blue tier; larger fluffies only come from merges
+ const pool=Array.from({length:variety},(_,i)=>i);
+ const n=dropHistory.length;
+ const choices=pool.filter(t=>!(n>=2&&dropHistory[n-1]===t&&dropHistory[n-2]===t));
+ const picked=choices[Math.floor(Math.random()*choices.length)];
+ dropHistory.push(picked);
+ if(dropHistory.length>5)dropHistory.shift();
+ return picked;
+}
+function persist(){safeSave('fluffy3_progress',progress)}
+function saveProfile(){const name=$('player-name').value.trim().replace(/[<>]/g,'').slice(0,16)||'Player';profile={name,flag:$('player-country').value||'🌍'};safeSave('fluffy3_profile',profile)}
+function notify(s,d=1200){$('toast').textContent=s;$('toast').classList.add('show');toastUntil=performance.now()+d}
+function setOverlay(id,on){$(id).classList.toggle('hidden',!on)}
+function allClosed(){for(const id of ['welcome','levels-overlay','leader-overlay','pause-overlay','win-overlay','over-overlay','continue-overlay'])setOverlay(id,false)}
+function currentTheme(){return themes.find(x=>x.id===progress.theme)||themes[0]}
+function loadBest(){const k=mode==='story'?'story':mode==='rush'?'rush':'classic';const prev=Number(safeGet('fluffy3_best_'+k,0))||0;const v2=mode==='classic'?Number(safeGet('fluffy_v2_classic_best',0))||0:mode==='rush'?Number(safeGet('fluffy_v2_rush_best',0))||0:0;best=Math.max(prev,v2);$('best').textContent=fmt(best)}
+function storeBest(){safeSave('fluffy3_best_'+mode,best)}
+function recordScore(){if(score<=0)return;saveProfile();const row={name:profile.name,flag:profile.flag,mode,score:Math.round(score),level:mode==='story'?levelNumber:0,date:Date.now()};board.push(row);board=board.filter(r=>r&&['story','classic','rush'].includes(r.mode)&&Number.isFinite(Number(r.score))).sort((a,b)=>b.score-a.score).slice(0,75);safeSave('fluffy3_leaderboard',board)}
+function dailyGift(){const d=new Date();const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');if(progress.lastDaily===k)return false;progress.lastDaily=k;progress.coins+=15;persist();return true}
+function coinsUI(){$('coin-display').textContent='🪙 '+progress.coins;$('menu-coins').textContent='🪙 '+progress.coins}
+function setChoice(which){selectedMode=which;for(const m of ['story','classic','rush']){const on=m===which;$('choice-'+m).classList.toggle('selected',on);$('choice-'+m).setAttribute('aria-pressed',String(on))}$('start-btn').textContent=which==='story'?'PLAY STORY! ⭐':which==='classic'?'PLAY CLASSIC 🌈':'PLAY RUSH! ⚡'}
+function roundRect(x,y,ww,hh,r){r=Math.min(r,ww/2,hh/2);c.beginPath();c.moveTo(x+r,y);c.arcTo(x+ww,y,x+ww,y+hh,r);c.arcTo(x+ww,y+hh,x,y+hh,r);c.arcTo(x,y+hh,x,y,r);c.arcTo(x,y,x+ww,y,r);c.closePath()}
+function radius(t){const raw=TYPES[t].r*scale;return t>=7?Math.min(raw,(jar.right-jar.left)*(.19+(t-7)*.012)):raw}
+function resize(){const rect=canvas.getBoundingClientRect(),old=jar;w=Math.max(200,rect.width||360);h=Math.max(210,rect.height||400);dpr=Math.min(2.3,devicePixelRatio||1);canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);c.setTransform(dpr,0,0,dpr,0,0);const jw=Math.min(400,w*.87);scale=clamp(jw/322,.70,1.13);const top=Math.max(65,Math.min(123,h*.195));jar={left:(w-jw)/2+5,right:(w+jw)/2-5,top,bottom:h-22,danger:top+39*scale};if(balls.length){const xs=(jar.right-jar.left)/(old.right-old.left||1),ys=(jar.bottom-jar.top)/(old.bottom-old.top||1);for(const b of balls){b.r=radius(b.tier);b.x=clamp(jar.left+(b.x-old.left)*xs,jar.left+b.r,jar.right-b.r);b.y=clamp(jar.top+(b.y-old.top)*ys,-b.r,jar.bottom-b.r);b.vx*=xs;b.vy*=ys}}dropX=clamp(dropX*(w/(resize.oldW||w)),jar.left+TYPES[tier].r*scale,jar.right-TYPES[tier].r*scale);resize.oldW=w;next.width=112;next.height=88;nc.setTransform(2,0,0,2,0,0);drawNext()}
+function reset(){clearAttemptCheckpoint();attemptId=newAttemptId();dropBudgetExtra=0;continueUsed=false;continuePending=false;pendingTransition=false;balls=[];fx=[];rings=[];textFx=[];celebrateQueue=[];lastDropDeadline=0;dropHistory=[];nextId=1;score=0;tier=randomTier();nextTier=randomTier();held=null;holdCooldown=0;dropX=w/2;dropLock=0;activePointer=null;touching=false;timeLeft=90;overflow=0;shakeProgress=0;shakes=0;combo=0;maxCombo=0;lastMerge=-999;milestone=250;alertedDanger=false;mergeCount=0;highestTier=0;drops=0;fullness=0;flash=0;screenKick=0;winTimer=0;
+ loadBest();$('score').textContent='0';$('mode-label').textContent=mode==='story'?'🗺️ STORY':mode==='rush'?'⚡ RUSH':'♾️ CLASSIC';$('time-label').classList.remove('low','story-moves');$('time-label').textContent=mode==='rush'?'01:30':'NO TIMER';if(mode==='story'&&LEVELS[levelNumber-1].maxDrops)$('time-label').classList.add('story-moves');$('danger-fill').style.width='0%';$('combo-label').textContent='✨ MAKE A COMBO';$('combo-label').classList.remove('live');$('power-bar').classList.remove('alert');$('level-ribbon').classList.toggle('show',mode==='story');$('footer-help').textContent='Merge • Save • Collect stars!';drawNext();updateGoal();updatePowers();coinsUI();}
+function begin(which=selectedMode,level=chosenLevel){saveProfile();mode=which;if(mode==='story')levelNumber=clamp(level,1,progress.unlocked);reset();state='playing';allClosed();updatePowers();lastFrame=0;sounds.init();if(dailyGift())notify('DAILY GIFT +15 COINS! 🎁',1700);coinsUI()}
+function menu(){state='menu';touching=false;allClosed();setChoice('story');setOverlay('welcome',true);coinsUI();updatePowers();$('pause-btn').textContent='⏸'}
+function pause(){if(state!=='playing')return;state='paused';touching=false;activePointer=null;setOverlay('pause-overlay',true);$('pause-btn').textContent='▶';updatePowers()}
+function resume(){if(state!=='paused')return;state='playing';setOverlay('pause-overlay',false);$('pause-btn').textContent='⏸';lastFrame=0;updatePowers()}
+function end(reason){if(state!=='playing')return;if(reason==='moves'&&offerContinue())return;clearAttemptCheckpoint();state='over';touching=false;activePointer=null;recordScore();updatePowers();setOverlay('over-overlay',true);$('over-title').textContent=reason==='time'?'TIME IS UP! ⏰':reason==='moves'?'OUT OF DROPS! 🎯':'JAR OVERFLOW!';$('over-copy').textContent=reason==='moves'?`Earn ${LEVELS[levelNumber-1].goal} merge points within ${LEVELS[levelNumber-1].maxDrops} drops. Score only awards bonus stars!`:mode==='story'?`Level ${levelNumber}: ${LEVELS[levelNumber-1].label}. Give it another try!`:reason==='time'?'Make merges quickly to gain extra time!':'The fluffy friends need a better drop strategy!';$('final-score').textContent=fmt(score);$('final-best').textContent=fmt(best);sounds.fail();sounds.vibrate([35,60,60])}
+function levelProgress(){const l=LEVELS[levelNumber-1];return l.type==='merges'?mergeCount:l.type==='tier'?highestTier:l.type==='combo'?maxCombo:score}
+function updateDropBudget(){const l=mode==='story'?LEVELS[levelNumber-1]:null;if(!l||!l.maxDrops)return;const left=Math.max(0,l.maxDrops+dropBudgetExtra-drops);$('time-label').textContent=`🎯 ${left} LEFT`;$('time-label').classList.toggle('low',left<=5)}
+function scoreStars(l,points=score){return points>=l.bonusScore?3:points>=Math.ceil(l.bonusScore*.6)?2:1}
+function updateGoal(){
+ if(mode!=='story')return;
+ const l=LEVELS[levelNumber-1],done=Math.min(mergeCount,l.goal);
+ $('level-title').textContent=`⭐ LEVEL ${levelNumber} / ${N}`;
+ $('goal-copy').textContent=`🎯 MERGE MISSION ${fmt(done)}/${fmt(l.goal)} points`;
+ $('goal-progress').style.width=clamp(mergeCount/l.goal*100,0,100)+'%';
+ const stars=scoreStars(l);
+ $('bonus-copy').textContent=`✨ BONUS STARS ${'★'.repeat(stars)}${'☆'.repeat(3-stars)} · Score ${fmt(score)}/${fmt(l.bonusScore)}`;
+ $('bonus-progress').style.width=clamp(score/l.bonusScore*100,0,100)+'%';
+ updateDropBudget();
+}
+function completeLevel(){if(state!=='playing'||mode!=='story')return;clearAttemptCheckpoint();state='celebrating';updatePowers();recordScore();const l=LEVELS[levelNumber-1];earnedStars=scoreStars(l);const prior=Number(progress.stars[levelNumber]||0);progress.stars[levelNumber]=Math.max(prior,earnedStars);const newStars=Math.max(0,earnedStars-prior);earnedCoins=prior===0?l.reward+(earnedStars-1)*9:newStars*9;progress.coins+=earnedCoins;progress.unlocked=Math.max(progress.unlocked,Math.min(N,levelNumber+1));persist();coinsUI();$('win-stars').textContent='⭐'.repeat(earnedStars)+'☆'.repeat(3-earnedStars);$('win-score').textContent=fmt(score);$('win-coins').textContent='+'+earnedCoins;$('win-total').textContent=fmt(progress.coins);$('win-description').textContent=levelNumber===N?'All 100 levels cleared! Replay for more stars!':`Merge mission cleared! ${earnedStars}★ · Score ${fmt(score)}/${fmt(l.bonusScore)} for 3★ · Next level unlocked!`;$('next-level-btn').textContent=levelNumber===N?'REPLAY THIS LEVEL ↻':`PLAY LEVEL ${levelNumber+1} ➜`;notify('LEVEL COMPLETE! 🎉',1800);const mid=w/2,yy=jar.top+(jar.bottom-jar.top)*.4;celebrateQueue=balls.slice().sort((a,b)=>b.y-a.y);for(let i=0;i<65;i++)particle(rnd(jar.left,jar.right),rnd(jar.top,jar.bottom),TYPES[i%TYPES.length].c,1.8);rings.push({x:mid,y:yy,r:25,life:1,color:'#ffe080'});flash=.72;screenKick=8;sounds.success();sounds.vibrate([20,40,30,40,40]);winTimer=performance.now()+Math.max(1650,1200+celebrateQueue.length*65)}
+function updatePowers(){const holdUsable=state==='playing'&&holdCooldown===0,shakeUsable=state==='playing'&&shakes>0;$('hold-btn').disabled=!holdUsable;$('shake-btn').disabled=!shakeUsable;$('hold-info').textContent=holdCooldown>0?`Ready in ${holdCooldown} drop${holdCooldown===1?'':'s'}`:fullness>=.5?(tier===0?'Smallest fluffy ready':'Rescue: switch to smaller'):held===null?'Save current fluffy':`Saved: tier ${held+1}`;$('shake-info').textContent=shakes?`${shakes} ready • tap to mix`:`${shakeProgress} / 3 merges`; $('power-bar').classList.toggle('alert',state==='playing'&&fullness>=.5&&(holdUsable||shakeUsable))}
+function ball(x,y,t,vx=0,vy=0){return{id:nextId++,x,y,vx,vy,r:radius(t),tier:t,age:0,rot:rnd(-.25,.25),spin:rnd(-.02,.02),blink:rnd(0,7)}}
+function point(e){const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*w/r.width;dropX=clamp(x,jar.left+TYPES[tier].r*scale,jar.right-TYPES[tier].r*scale)}
+function down(e){if(state!=='playing'||performance.now()<dropLock||activePointer!==null||(mode==='story'&&LEVELS[levelNumber-1].maxDrops&&drops>=LEVELS[levelNumber-1].maxDrops+dropBudgetExtra))return;e.preventDefault();sounds.init();touching=true;activePointer=e.pointerId;point(e);try{canvas.setPointerCapture(e.pointerId)}catch(_){}}
+function move(e){if(!touching||activePointer!==e.pointerId)return;e.preventDefault();point(e)}
+function up(e){if(!touching||activePointer!==e.pointerId)return;e.preventDefault();point(e);touching=false;activePointer=null;drop()}
+function cancel(){touching=false;activePointer=null}
+function drop(){if(state!=='playing'||performance.now()<dropLock||(mode==='story'&&LEVELS[levelNumber-1].maxDrops&&drops>=LEVELS[levelNumber-1].maxDrops+dropBudgetExtra))return;const r=TYPES[tier].r*scale;balls.push(ball(dropX,Math.max(r+5,jar.top-r-18),tier));drops++;sounds.drop();tier=nextTier;nextTier=randomTier();dropLock=performance.now()+300;holdCooldown=Math.max(0,holdCooldown-1);dropX=clamp(dropX,jar.left+TYPES[tier].r*scale,jar.right-TYPES[tier].r*scale);drawNext();updatePowers();if(mode==='story'&&LEVELS[levelNumber-1].maxDrops){updateGoal();if(drops>=LEVELS[levelNumber-1].maxDrops+dropBudgetExtra){lastDropDeadline=performance.now()+3200;notify('FINAL DROP! LET THE MERGES SETTLE ✨',1900)}}saveAttemptCheckpoint()}
+function hold(){
+ if(state!=='playing'||holdCooldown!==0||performance.now()<dropLock)return;
+ const crowded=fullness>=.5;
+ let message='FLUFFY SAVED! 🫴';
+ if(crowded){
+  // Rescue behavior: do not turn a large incoming fluffy into another large one.
+  if(tier===0){notify('SMALLEST FLUFFY IS READY! 💗');return}
+  const before=tier;
+  if(held!==null&&held<tier){
+   // A smaller saved fluffy is ideal: swap it in and hold the old large one.
+   tier=held;held=before;
+  }else{
+   // If no smaller saved fluffy is available, exchange for a guaranteed smaller one.
+   // Keep the cooldown to prevent unlimited size conversions.
+   const limit=Math.min(3,before); // never generate above yellow tier (index 2)
+   tier=Math.floor(Math.random()*limit);
+   held=before;
+  }
+  message='RESCUE SWAP! SMALLER FLUFFY 💗';
+ }else if(held===null){
+  held=tier;tier=nextTier;nextTier=randomTier();
+ }else{const temp=tier;tier=held;held=temp;message='FLUFFIES SWAPPED! ✨'}
+ holdCooldown=3;
+ sounds.drop();
+ dropX=clamp(dropX,jar.left+TYPES[tier].r*scale,jar.right-TYPES[tier].r*scale);
+ drawNext();updatePowers();notify(message);
+}
+function shake(){if(state!=='playing'||shakes<1)return;shakes--;for(const b of balls){b.vx+=rnd(-4,4);b.vy-=rnd(2.2,5.2);b.spin+=rnd(-.04,.04)}sounds.shake();sounds.vibrate(25);updatePowers();notify('MAGIC SHAKE! ✨');screenKick=7;for(let i=0;i<35;i++)particle(rnd(jar.left,jar.right),rnd(jar.top,jar.bottom),TYPES[i%TYPES.length].c)}
+function particle(x,y,color,power=1){const a=rnd(0,Math.PI*2),v=rnd(1.3,4.1)*power;fx.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-.7,r:rnd(2,5)*Math.sqrt(power),life:1,color,star:Math.random()<.45});if(fx.length>520)fx.splice(0,fx.length-520)}
+function megaBurst(x,y,t,power=1){
+ const col=TYPES[Math.min(t,TYPES.length-1)].c;
+ for(let k=0;k<Math.min(105,44+Math.round(t*7));k++)particle(x+rnd(-8,8),y+rnd(-8,8),k%3?TYPES[(t+k)%TYPES.length].c:col,rnd(1.7,3.2)*power);
+ for(let k=0;k<16;k++){const a=k*Math.PI*2/16;fx.push({x:x+Math.cos(a)*9,y:y+Math.sin(a)*9,vx:Math.cos(a)*(4.2+power*2),vy:Math.sin(a)*(4.2+power*2),r:rnd(3,7),life:1.25,color:k%2?'#fff7a9':col,star:true});}
+ rings.push({x,y,r:Math.max(11,8+t*2),life:1,color:col});rings.push({x,y,r:3,life:.85,color:'#fff1a1'});
+ screenKick=Math.max(screenKick,Math.min(11,4+t*.72));flash=Math.max(flash,.18+t*.025);
+}
+function popText(x,y,label){textFx.push({x,y,label,life:1});if(textFx.length>30)textFx.shift()}
+function merge(a,b){const i=balls.indexOf(a),j=balls.indexOf(b);if(i<0||j<0||i===j||a.tier!==b.tier||a.tier===TYPES.length-1)return;const t=a.tier+1,x=(a.x+b.x)/2,y=(a.y+b.y)/2;balls.splice(Math.max(i,j),1);balls.splice(Math.min(i,j),1);const r=radius(t);balls.push(ball(clamp(x,jar.left+r,jar.right-r),Math.min(y,jar.bottom-r),t,(a.vx+b.vx)*.27,(a.vy+b.vy)*.18-1.5));const now=performance.now();combo=now-lastMerge<3900?Math.min(5,combo+1):1;lastMerge=now;maxCombo=Math.max(maxCombo,combo);const big=t>=5;const mergeCredit=big?2:1;mergeCount+=mergeCredit;highestTier=Math.max(highestTier,t);const points=TYPES[t].score*combo;score+=points;$('score').textContent=fmt(score);if(score>best){best=score;$('best').textContent=fmt(best);storeBest()}
+ shakeProgress++;if(shakeProgress>=3){shakeProgress=0;shakes=Math.min(2,shakes+1);notify('MAGIC SHAKE READY! 🪄')}
+ if(mode==='rush')timeLeft=Math.min(120,timeLeft+2);if(score>=milestone){milestone=Math.ceil((score+1)/250)*250;notify('SWEET MILESTONE! 🌟');for(let n=0;n<27;n++)particle(rnd(jar.left,jar.right),rnd(jar.top,jar.bottom),TYPES[n%TYPES.length].c)}
+ if(big){megaBurst(x,y,t);popText(x,y-38,'2× MERGE PROGRESS ✨');popText(x,y-21,t>=8?'ULTRA FLUFF! 🌟':'MEGA PUFF! ✨');sounds.big(t);sounds.vibrate([25,28,35])}else{for(let k=0;k<23;k++)particle(x,y,TYPES[t].c,1.2);sounds.merge(t);sounds.vibrate(12)}popText(x,y,`+${fmt(points)}${combo>1?' ×'+combo:''}`);$('combo-label').textContent=combo>1?`🔥 ${combo}× COMBO`:'💖 SWEET MERGE!';$('combo-label').classList.add('live');updateGoal();updatePowers();saveAttemptCheckpoint();if(mode==='story'){const lvl=LEVELS[levelNumber-1];if(mergeCount>=lvl.goal)completeLevel()}}
+function physics(dt){const step=dt*60/3;for(let it=0;it<3;it++){for(const b of balls){b.age+=dt/3;b.vy+=.25*step;b.vx*=Math.pow(.992,step);b.vy*=Math.pow(.998,step);b.x+=b.vx*step;b.y+=b.vy*step;b.rot+=b.spin*step;if(b.x-b.r<jar.left){b.x=jar.left+b.r;b.vx=Math.abs(b.vx)*.22}if(b.x+b.r>jar.right){b.x=jar.right-b.r;b.vx=-Math.abs(b.vx)*.22}if(b.y+b.r>jar.bottom){b.y=jar.bottom-b.r;b.vy=-Math.abs(b.vy)*.07;b.vx*=.92}}
+ let merged=false;outer:for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++){const a=balls[i],b=balls[j],dx=b.x-a.x,dy=b.y-a.y,rr=a.r+b.r;if(Math.abs(dx)>rr||Math.abs(dy)>rr)continue;const dd=dx*dx+dy*dy;if(dd>=rr*rr)continue;if(a.tier===b.tier&&a.tier<TYPES.length-1){merge(a,b);merged=true;break outer}const dist=Math.sqrt(dd)||.001,nx=dist<.002?1:dx/dist,ny=dist<.002?0:dy/dist,over=Math.min(rr-dist,35*scale),invA=1/(a.r*a.r),invB=1/(b.r*b.r),total=invA+invB;a.x-=nx*over*.86*(invA/total);a.y-=ny*over*.86*(invA/total);b.x+=nx*over*.86*(invB/total);b.y+=ny*over*.86*(invB/total);const vel=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;if(vel<0){const imp=-1.11*vel/total;a.vx-=imp*invA*nx;a.vy-=imp*invA*ny;b.vx+=imp*invB*nx;b.vy+=imp*invB*ny}}
+ if(merged){if(state!=='playing')return;continue}for(const b of balls){b.x=clamp(b.x,jar.left+b.r,jar.right-b.r);if(b.y+b.r>jar.bottom){b.y=jar.bottom-b.r;if(b.vy>0)b.vy=0}}}
+ // Only settled balls contribute to jar fullness, so a newly dropped ball cannot falsely warn players.
+ const settled=balls.filter(b=>b.age>.65&&Math.abs(b.vy)<1.7),pileTop=settled.length?Math.min(...settled.map(b=>b.y-b.r)):jar.bottom;const f=clamp((jar.bottom-pileTop)/(jar.bottom-jar.top),0,1);const prior=fullness;fullness=fullness*.82+f*.18;const danger=balls.some(b=>b.age>1.25&&b.y-b.r<jar.danger&&Math.abs(b.vy)<1.8);overflow=clamp(overflow+(danger?dt:-dt*1.9),0,2.8);$('danger-fill').style.width=`${Math.round(overflow/2.8*100)}%`;
+ if(fullness>=.5&&prior<.5)notify('KEEP YOUR FLUFFIES SMILING! 💗',1550);if(fullness>=.68&&prior<.68)notify('SAD FLUFFIES! USE YOUR HELPERS! 🥺',1500);if(fullness>=.84&&prior<.84)notify('FLUFFIES ARE PANICKING! 😱',1450);if(overflow>.75&&!alertedDanger){notify('JAR OVERFLOW WARNING! 🚨');alertedDanger=true}if(overflow<.1)alertedDanger=false;if(overflow>=2.8)end('overflow');if((prior<.5&&fullness>=.5)||(prior>=.5&&fullness<.5))updatePowers();}
+function drawFluffy(cc,x,y,r,t,rotation=0,alpha=1,emotion=0,now=0){cc.save();cc.globalAlpha*=alpha;cc.translate(x,y);cc.rotate(rotation);
+ cc.shadowColor='rgba(78,55,110,.20)';cc.shadowBlur=r*.26;cc.shadowOffsetY=r*.08;
+ const halo=cc.createRadialGradient(-r*.18,-r*.22,r*.12,0,0,r*1.15);halo.addColorStop(0,'#fffef9');halo.addColorStop(.26,TYPES[t].c);halo.addColorStop(.8,TYPES[t].c);halo.addColorStop(1,'rgba(255,255,255,.0)');
+ cc.fillStyle=halo;cc.beginPath();cc.arc(0,0,r*1.02,0,Math.PI*2);cc.fill();
+ cc.shadowBlur=0;cc.shadowOffsetY=0;
+ cc.fillStyle='rgba(255,255,255,.18)';for(let i=0;i<14;i++){const a=i/14*Math.PI*2;cc.beginPath();cc.arc(Math.cos(a)*r*.90,Math.sin(a)*r*.90,r*.12,0,Math.PI*2);cc.fill()}
+ const core=cc.createRadialGradient(-r*.32,-r*.4,r*.08,r*.12,r*.12,r*1.02);core.addColorStop(0,'#fffef8');core.addColorStop(.2,TYPES[t].c);core.addColorStop(.82,TYPES[t].c);core.addColorStop(1,'rgba(72,54,92,.28)');cc.fillStyle=core;cc.beginPath();cc.arc(0,0,r*.92,0,Math.PI*2);cc.fill();
+ cc.strokeStyle='rgba(255,255,255,.75)';cc.lineWidth=Math.max(1,r*.04);cc.beginPath();cc.arc(0,0,r*.9,0,Math.PI*2);cc.stroke();
+ cc.fillStyle='rgba(255,255,255,.46)';cc.beginPath();cc.ellipse(-r*.25,-r*.36,r*.24,r*.11,-.45,0,Math.PI*2);cc.fill();
+ const er=Math.max(1.35,r*.09),blink=Math.sin(now*.0016+t*3)>.995;cc.fillStyle='#4a3b61';cc.lineWidth=Math.max(1,r*.06);cc.lineCap='round';if(blink){cc.beginPath();cc.moveTo(-r*.34,-r*.05);cc.lineTo(-r*.18,-r*.05);cc.moveTo(r*.18,-r*.05);cc.lineTo(r*.34,-r*.05);cc.stroke()}else{cc.beginPath();cc.arc(-r*.23,-r*.05,er,0,Math.PI*2);cc.arc(r*.23,-r*.05,er,0,Math.PI*2);cc.fill();cc.fillStyle='#fff';cc.beginPath();cc.arc(-r*.26,-r*.10,er*.35,0,Math.PI*2);cc.arc(r*.20,-r*.10,er*.35,0,Math.PI*2);cc.fill()}
+ cc.strokeStyle='#664c77';cc.lineWidth=Math.max(1.3,r*.05);cc.beginPath();if(emotion===0){cc.arc(0,r*.05,r*.16,.08,Math.PI-.08)}else if(emotion===1){cc.moveTo(-r*.13,r*.14);cc.lineTo(r*.13,r*.14)}else if(emotion===2){cc.arc(0,r*.33,r*.16,Math.PI*1.08,Math.PI*1.92)}else{cc.ellipse(0,r*.16,r*.10,r*.14,0,0,Math.PI*2)}cc.stroke();
+ if(emotion>=1){cc.fillStyle='rgba(242,120,173,.55)';cc.beginPath();cc.ellipse(-r*.43,r*.12,r*.12,r*.07,0,0,Math.PI*2);cc.ellipse(r*.43,r*.12,r*.12,r*.07,0,0,Math.PI*2);cc.fill()}
+ if(emotion===3){cc.fillStyle='#a9e8ff';cc.beginPath();cc.ellipse(r*.42,r*.17,r*.05,r*.12,.3,0,Math.PI*2);cc.fill()}
+ cc.restore()}
+function drawNext(){nc.clearRect(0,0,56,44);drawFluffy(nc,28,22,Math.min(17,9+nextTier*2),nextTier)}
+function drawSparkle(x,y,r,color){c.save();c.translate(x,y);c.fillStyle=color;c.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4-Math.PI/2,rr=i%2?r*.38:r;c.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}c.closePath();c.fill();c.restore()}
+function render(now){c.clearRect(0,0,w,h);c.save();if(screenKick>.1)c.translate(rnd(-screenKick,screenKick)*.38,rnd(-screenKick,screenKick)*.3);
+ c.fillStyle='#ffffff73';for(let i=0;i<27;i++){const x=(i*181.7+41)%w,y=(i*147.3+48)%h;c.beginPath();c.arc(x,y,i%3===0?2:1,0,Math.PI*2);c.fill()}
+ const x=jar.left-6,ww=jar.right-jar.left+12,top=jar.top-7,bottom=jar.bottom+11,theme=currentTheme();
+ c.save();
+ // clear-cut glass with glowing metallic gold sides
+ c.shadowBlur=26;c.shadowColor='rgba(223,155,39,.35)';
+ const body=c.createLinearGradient(x,0,x+ww,0);
+ body.addColorStop(0,theme.glass+'d7');body.addColorStop(.10,'#ffffff9c');body.addColorStop(.30,theme.glass+'45');body.addColorStop(.68,'#ffffff21');body.addColorStop(.89,theme.glass+'7d');body.addColorStop(1,'#fff3c7ad');
+ roundRect(x,top,ww,bottom-top,22);c.fillStyle=body;c.fill();c.shadowBlur=0;
+ const gild=c.createLinearGradient(x,top,x+ww,bottom);
+ gild.addColorStop(0,'#a6660e');gild.addColorStop(.13,'#fff5c0');gild.addColorStop(.28,'#fbd76a');gild.addColorStop(.44,'#d18b1b');gild.addColorStop(.65,'#ffec94');gild.addColorStop(.85,'#b67612');gild.addColorStop(1,'#ffe9a0');
+ roundRect(x,top,ww,bottom-top,22);c.strokeStyle=gild;c.lineWidth=8;c.stroke();
+ roundRect(x+5,top+5,ww-10,bottom-top-10,18);c.strokeStyle='rgba(255,252,221,.86)';c.lineWidth=2.1;c.stroke();
+ // warm reflection down both jar walls; sparkling mirrored glass
+ const shine=c.createLinearGradient(x,0,x+23,0);shine.addColorStop(0,'#fff7cfed');shine.addColorStop(.35,'#fffdf8b4');shine.addColorStop(1,'#ffffff00');c.fillStyle=shine;roundRect(x+8,top+19,18,bottom-top-42,9);c.fill();
+ c.strokeStyle='#fff4baaf';c.lineWidth=4;c.beginPath();c.moveTo(x+ww-13,top+19);c.lineTo(x+ww-13,bottom-24);c.stroke();
+ // open gold lip with inner highlight
+ c.clearRect(x+20,top-7,ww-40,11);
+ const rim=c.createLinearGradient(0,top-10,0,top+12);
+ rim.addColorStop(0,'#fffbe0');rim.addColorStop(.35,'#ffe27c');rim.addColorStop(.68,'#c78517');rim.addColorStop(1,'#fff0a5');
+ c.strokeStyle=rim;c.lineWidth=7;c.lineCap='round';c.beginPath();c.moveTo(x-1,top+14);c.lineTo(x-1,top+2);c.quadraticCurveTo(x,top-5,x+13,top-5);c.lineTo(x+ww-13,top-5);c.quadraticCurveTo(x+ww,top-5,x+ww+1,top+2);c.lineTo(x+ww+1,top+14);c.stroke();
+ c.strokeStyle='rgba(255,255,245,.8)';c.lineWidth=2;c.beginPath();c.moveTo(x+9,top-6);c.lineTo(x+ww-9,top-6);c.stroke();
+ // base pedestal gives the body a polished golden finish
+ c.fillStyle='rgba(211,140,30,.23)';roundRect(x+11,bottom-4,ww-22,10,5);c.fill();
+ const a=overflow>.5?.7+.28*Math.sin(now*.015):.38;c.strokeStyle=`rgba(243,77,133,${a})`;c.lineWidth=2;c.setLineDash([7,8]);c.beginPath();c.moveTo(jar.left,jar.danger);c.lineTo(jar.right,jar.danger);c.stroke();c.setLineDash([]);if(overflow>.5){c.font='900 10px system-ui';c.textAlign='center';c.fillStyle='#ed5591';c.fillText('⚠ DANGER',w/2,jar.danger-8)}c.restore();
+ if(state==='playing'&&now>dropLock){const r=TYPES[tier].r*scale,y=Math.max(r+5,jar.top-r-18);c.save();c.setLineDash([4,7]);c.strokeStyle='#b891c1a0';c.lineWidth=1.5;c.beginPath();c.moveTo(dropX,y+r);c.lineTo(dropX,jar.bottom-3);c.stroke();c.setLineDash([]);drawFluffy(c,dropX,y,r,tier,Math.sin(now*.003)*.04,.94,0,now);c.restore()}
+ const emotion=fullness>=.84?3:fullness>=.7?2:fullness>=.5?1:0;for(const b of balls)drawFluffy(c,b.x,b.y,b.r,b.tier,b.rot,1,emotion,now);
+ c.save();const lip=c.createLinearGradient(0,jar.top-14,0,jar.top+14);lip.addColorStop(0,'#fff9d2');lip.addColorStop(.4,'#ffe084');lip.addColorStop(.8,'#b77d15');lip.addColorStop(1,'#ffeaa6');c.strokeStyle=lip;c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(jar.left-5,jar.top-8);c.lineTo(jar.right+5,jar.top-8);c.stroke();c.strokeStyle='rgba(255,255,255,.82)';c.lineWidth=1.6;c.beginPath();c.moveTo(jar.left+4,jar.top-9.5);c.lineTo(jar.right-4,jar.top-9.5);c.stroke();c.restore();
+ for(const ring of rings){c.globalAlpha=clamp(ring.life,0,1);c.beginPath();c.arc(ring.x,ring.y,ring.r,0,Math.PI*2);c.strokeStyle=ring.color;c.lineWidth=8*ring.life;c.stroke()}c.globalAlpha=1;
+ for(const p of fx){c.globalAlpha=clamp(p.life,0,1);if(p.star)drawSparkle(p.x,p.y,p.r*1.7,p.color);else{c.fillStyle=p.color;c.beginPath();c.arc(p.x,p.y,p.r,0,Math.PI*2);c.fill()}}c.globalAlpha=1;
+ for(const p of textFx){c.globalAlpha=clamp(p.life,0,1);c.textAlign='center';c.font='1000 18px system-ui';c.lineWidth=4;c.strokeStyle='#fffdf7';c.strokeText(p.label,p.x,p.y);c.fillStyle='#e864ac';c.fillText(p.label,p.x,p.y)}c.globalAlpha=1;if(flash>0){c.fillStyle=`rgba(255,255,255,${flash*.3})`;c.fillRect(0,0,w,h)}c.restore()}
+function tick(now){if(!lastFrame)lastFrame=now;const dt=clamp((now-lastFrame)/1000,0,.033);lastFrame=now;if(state==='playing'){physics(dt);if(state==='playing'&&mode==='rush'){timeLeft=Math.max(0,timeLeft-dt);const mins=Math.floor(timeLeft/60),secs=Math.ceil(timeLeft%60);$('time-label').textContent=`⏱ ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;$('time-label').classList.toggle('low',timeLeft<=15);if(timeLeft<=0)end('time')}if(combo>0&&now-lastMerge>3900){combo=0;$('combo-label').textContent='✨ MAKE A COMBO';$('combo-label').classList.remove('live')}}if(state==='playing'&&lastDropDeadline&&now>=lastDropDeadline){lastDropDeadline=0;end('moves')}
+if(state==='celebrating'&&celebrateQueue.length){const burst=celebrateQueue.shift(),idx=balls.indexOf(burst);if(idx>=0){balls.splice(idx,1);megaBurst(burst.x,burst.y,burst.tier,.75);if(celebrateQueue.length%3===0)sounds.merge(Math.min(8,burst.tier+2));}}
+if(state==='celebrating'&&now>winTimer){balls=[];celebrateQueue=[];state='win';setOverlay('win-overlay',true)}if($('toast').classList.contains('show')&&now>toastUntil)$('toast').classList.remove('show');for(const p of fx){p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;p.vy+=dt*7;p.life-=dt*1.55}fx=fx.filter(p=>p.life>0);for(const p of textFx){p.y-=dt*37;p.life-=dt*.85}textFx=textFx.filter(p=>p.life>0);for(const r of rings){r.r+=dt*180;r.life-=dt*1.25}rings=rings.filter(p=>p.life>0);flash=Math.max(0,flash-dt*1.8);screenKick=Math.max(0,screenKick-dt*22);render(now);requestAnimationFrame(tick)}
+function openMap(from='menu'){returnFromMap=from;saveProfile();allClosed();if(state==='playing')pause();if(state==='paused')setOverlay('pause-overlay',false);setOverlay('levels-overlay',true);delete $('level-map').dataset.opened;renderMap()}
+const CHAPTER_NAMES=['Candy Meadows','Bubble Bay','Golden Gardens','Minty Peaks','Berry Bounce','Cloud Castle','Sugar Rush','Starlight Valley','Rainbow Ridge','Fluffy Finale'];
+function renderMap(){
+ const box=$('level-map'),oldScroll=box.scrollTop;box.textContent='';
+ for(const l of LEVELS){
+  if((l.n-1)%10===0){const ch=Math.floor((l.n-1)/10);const hd=document.createElement('div');hd.className='chapter-label';const name=document.createElement('span'),range=document.createElement('small');name.textContent=`CHAPTER ${ch+1} · ${CHAPTER_NAMES[ch]}`;range.textContent=`${ch*10+1}–${ch*10+10}`;hd.append(name,range);box.appendChild(hd)}
+  const b=document.createElement('button');b.className='level-node'+(l.n<=progress.unlocked&&progress.stars[l.n]?' done':'')+(chosenLevel===l.n?' current':'');b.disabled=l.n>progress.unlocked;b.textContent=l.n<=progress.unlocked?String(l.n):'🔒';b.setAttribute('aria-label',l.n<=progress.unlocked?`Level ${l.n}: ${l.label}`:`Level ${l.n} locked`);if(progress.stars[l.n]){const sp=document.createElement('span');sp.className='node-stars';sp.textContent='★'.repeat(progress.stars[l.n]);b.appendChild(sp)}b.addEventListener('click',()=>{chosenLevel=l.n;renderMap();box.scrollTop=oldScroll});box.appendChild(b)
+ }
+ const l=LEVELS[chosenLevel-1];$('map-details').textContent=`Level ${chosenLevel}: ${l.goal} merge pts in ${l.maxDrops} drops · Bonus: 2★ at ${fmt(Math.ceil(l.bonusScore*.6))}, 3★ at ${fmt(l.bonusScore)} score · Reward ${l.reward}+ coins · Best ${progress.stars[chosenLevel]||0}/3★`;$('map-play-btn').textContent=`PLAY LEVEL ${chosenLevel} ✨`;
+ if(!box.dataset.opened){const selected=box.querySelector('.level-node.current');if(selected)box.scrollTop=Math.max(0,selected.offsetTop-box.offsetTop-box.clientHeight*.32);box.dataset.opened='1'}
+}
+function closeMap(){setOverlay('levels-overlay',false);if(returnFromMap==='win'){setOverlay('win-overlay',true)}else menu()}
+function openLeader(from){returnFromLeader=from||state;if(state==='playing')pause();allClosed();leaderMode=mode;drawLeader();setOverlay('leader-overlay',true)}
+function drawLeader(){for(const b of document.querySelectorAll('[data-leader]'))b.classList.toggle('active',b.dataset.leader===leaderMode);const list=$('leader-list');list.textContent='';const rows=board.filter(r=>r.mode===leaderMode).sort((a,b)=>Number(b.score)-Number(a.score)).slice(0,10);if(!rows.length){const li=document.createElement('li');li.textContent='No scores yet. Be the first champion! 🏆';li.style.display='block';list.appendChild(li)}else rows.forEach((r,i)=>{const li=document.createElement('li'),rank=document.createElement('b'),flag=document.createElement('span'),name=document.createElement('span'),points=document.createElement('b');rank.textContent=String(i+1);flag.textContent=String(r.flag||'🌍');name.textContent=String(r.name||'Player').slice(0,16)+(leaderMode==='story'?' · L'+r.level:'');points.textContent=fmt(Number(r.score)||0);li.append(rank,flag,name,points);list.appendChild(li)})}
+function closeLeader(){setOverlay('leader-overlay',false);if(returnFromLeader==='playing'||returnFromLeader==='paused'){state='paused';setOverlay('pause-overlay',true)}else if(returnFromLeader==='over'){setOverlay('over-overlay',true)}else if(returnFromLeader==='win'){setOverlay('win-overlay',true)}else menu()}
+canvas.addEventListener('pointerdown',down,{passive:false});canvas.addEventListener('pointermove',move,{passive:false});canvas.addEventListener('pointerup',up,{passive:false});canvas.addEventListener('pointercancel',cancel);
+$('hold-btn').addEventListener('click',hold);$('shake-btn').addEventListener('click',shake);
+for(const m of ['story','classic','rush'])$('choice-'+m).addEventListener('click',()=>setChoice(m));
+$('start-btn').addEventListener('click',()=>{if(selectedMode==='story'){chosenLevel=progress.unlocked;openMap('menu')}else begin(selectedMode)});
+$('map-btn').addEventListener('click',()=>{chosenLevel=progress.unlocked;openMap('menu')});$('map-play-btn').addEventListener('click',()=>begin('story',chosenLevel));$('map-back-btn').addEventListener('click',closeMap);
+$('menu-leader-btn').addEventListener('click',()=>openLeader('menu'));$('leader-btn').addEventListener('click',()=>openLeader(state));$('leader-close').addEventListener('click',closeLeader);document.querySelectorAll('[data-leader]').forEach(b=>b.addEventListener('click',()=>{leaderMode=b.dataset.leader;drawLeader()}));
+$('pause-btn').addEventListener('click',()=>{if(state==='playing')pause();else if(state==='paused')resume()});$('resume-btn').addEventListener('click',resume);$('pause-menu-btn').addEventListener('click',menu);
+$('continue-watch').addEventListener('click',startRewardedContinue);$('continue-retry').addEventListener('click',()=>{if(state==='rescue'){recordScore();begin('story',levelNumber)}});$('privacy-choice').addEventListener('click',()=>{try{nativeAds()?.showPrivacyOptions?.()}catch(_){}});$('again-btn').addEventListener('click',()=>begin(mode,levelNumber));$('over-menu-btn').addEventListener('click',menu);$('next-level-btn').addEventListener('click',proceedNextLevel);$('win-map-btn').addEventListener('click',()=>{chosenLevel=Math.min(N,levelNumber+1);openMap('win')});
+$('audio-btn').addEventListener('click',()=>{sounds.muted=!sounds.muted;$('audio-btn').textContent=sounds.muted?'🔇':'🔊';$('audio-btn').setAttribute('aria-label',sounds.muted?'Enable sound effects':'Mute sound effects');if(!sounds.muted)sounds.init()});
+
+window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>requestAnimationFrame(resize));document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='playing')pause();lastFrame=0});
+// Back button / Escape. Returns true if the game handled it, false if the app should exit (called by Android).
+function handleBack(){
+ if(!$('leader-overlay').classList.contains('hidden')){closeLeader();return true}
+ if(!$('levels-overlay').classList.contains('hidden')){closeMap();return true}
+ if(state==='playing'){pause();return true}
+ if(state==='paused'){resume();return true}
+ if(state==='menu')return false;
+ if(state==='win'||state==='over'||state==='rescue'){menu();return true}
+ return true
+}
+window.FluffyBack=handleBack;
+window.addEventListener('keydown',e=>{if(e.key==='Escape')handleBack()});
+
+// Reuse the existing four-fluffy welcome SVG exactly, never introduce a separate brand rendering.
+function mountHeaderJarArt(){
+ const art=document.querySelector('#welcome .welcome-jar-art');
+ const host=$('header-jar-logo');
+ if(!art||!host)return;
+ const clone=art.cloneNode(true),rename={};
+ clone.classList.remove('welcome-jar-art');clone.classList.add('header-jar-art');
+ clone.querySelectorAll('[id]').forEach(el=>{rename[el.id]='header-'+el.id;el.id=rename[el.id]});
+ for(const el of [clone,...clone.querySelectorAll('*')]){
+  for(const at of [...el.attributes]){
+   let v=at.value;
+   for(const [before,after] of Object.entries(rename)){
+    v=v.split('url(#'+before+')').join('url(#'+after+')');
+    if((at.name==='href'||at.name==='xlink:href')&&v==='#'+before)v='#'+after;
+   }
+   if(v!==at.value)el.setAttribute(at.name,v);
+  }
+ }
+ host.replaceChildren(clone);
+}
+mountHeaderJarArt();
+$('player-name').value=profile.name||'Player';if([...$('player-country').options].some(o=>o.value===profile.flag))$('player-country').value=profile.flag;
+chosenLevel=progress.unlocked;const priorAttempt=safeGet(CONTINUE_KEY,null);resize();reset();coinsUI();if(priorAttempt)safeSave(CONTINUE_KEY,priorAttempt);const recovered=restoreAttemptCheckpoint();if(!recovered)menu();if(nativeAds()){try{window.FluffyGameAds.onPrivacyOptionsAvailable(nativeAds().privacyOptionsRequired?.());const rewarded=nativeAds().getPendingRewardId?.();if(rewarded&&rewarded===attemptId){grantRewardedDrops(rewarded)}}catch(_){}}requestAnimationFrame(tick);
+})();
+</script></body></html>
